@@ -9,6 +9,11 @@ let currentRow = 0;
 let currentCol = 0;
 let isGameOver = false;
 let hasAttachedKeyboardListeners = false;
+let hasUsedHint = false;
+
+let gamesPlayed = 0;
+let gamesWon = 0;
+let currentStreak = 0;
 
 // We keep a map of the best status seen so far for each letter.
 // This helps us color the on-screen keyboard correctly.
@@ -45,6 +50,7 @@ function initGame() {
   currentRow = 0;
   currentCol = 0;
   isGameOver = false;
+  hasUsedHint = false;
 
   // Clear previous key statuses.
   for (const letter in keyStatuses) {
@@ -71,6 +77,11 @@ function initGame() {
   const restartButton = document.getElementById("restart");
   if (restartButton) {
     restartButton.removeAttribute("disabled");
+  }
+
+  const hintButton = document.getElementById("hint");
+  if (hintButton) {
+    hintButton.removeAttribute("disabled");
   }
 }
 
@@ -420,6 +431,14 @@ function updateKeyStatus(letter, newStatus) {
 function endGame(didWin) {
   isGameOver = true;
 
+  gamesPlayed += 1;
+  if (didWin) {
+    gamesWon += 1;
+    currentStreak += 1;
+  } else {
+    currentStreak = 0;
+  }
+
   if (didWin) {
     showMessage("You won! 🎉");
   } else {
@@ -427,6 +446,13 @@ function endGame(didWin) {
   }
 
   disableKeyboard();
+
+  const hintButton = document.getElementById("hint");
+  if (hintButton) {
+    hintButton.setAttribute("disabled", "true");
+  }
+
+  updateStatsPanel();
 }
 
 /**
@@ -456,14 +482,58 @@ function getTile(row, col) {
   return document.querySelector(`.tile[data-row="${row}"][data-col="${col}"]`);
 }
 
+/**
+ * Update the simple stats panel in the DOM.
+ */
+function updateStatsPanel() {
+  const gamesPlayedEl = document.getElementById("stat-games-played");
+  const gamesWonEl = document.getElementById("stat-games-won");
+  const currentStreakEl = document.getElementById("stat-current-streak");
+
+  if (!gamesPlayedEl || !gamesWonEl || !currentStreakEl) {
+    return;
+  }
+
+  gamesPlayedEl.textContent = String(gamesPlayed);
+  gamesWonEl.textContent = String(gamesWon);
+  currentStreakEl.textContent = String(currentStreak);
+}
+
+/**
+ * Handle the one-time hint for the current game.
+ */
+function handleHint() {
+  if (isGameOver || hasUsedHint || !secretWord) {
+    return;
+  }
+
+  hasUsedHint = true;
+
+  const hintButton = document.getElementById("hint");
+  if (hintButton) {
+    hintButton.setAttribute("disabled", "true");
+  }
+
+  const firstLetter = secretWord[0];
+  showMessage(`Hint: The word starts with "${firstLetter}".`);
+}
+
 // Initialize the game when the page is fully loaded.
 window.addEventListener("DOMContentLoaded", () => {
+  updateStatsPanel();
   initGame();
 
   const restartButton = document.getElementById("restart");
   if (restartButton) {
     restartButton.addEventListener("click", () => {
       initGame();
+    });
+  }
+
+  const hintButton = document.getElementById("hint");
+  if (hintButton) {
+    hintButton.addEventListener("click", () => {
+      handleHint();
     });
   }
 });

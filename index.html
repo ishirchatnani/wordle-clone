@@ -22,7 +22,29 @@
         aria-label="On-screen keyboard"
       ></section>
 
+      <section
+        id="stats"
+        class="stats"
+        aria-label="Game statistics"
+      >
+        <p class="stats-row">
+          <span>Games played:</span>
+          <span id="stat-games-played">0</span>
+        </p>
+        <p class="stats-row">
+          <span>Games won:</span>
+          <span id="stat-games-won">0</span>
+        </p>
+        <p class="stats-row">
+          <span>Current streak:</span>
+          <span id="stat-current-streak">0</span>
+        </p>
+      </section>
+
       <section class="restart-container">
+        <button id="hint" class="hint-button" type="button">
+          Give me a hint
+        </button>
         <button id="restart" class="restart-button" type="button">
           New Game
         </button>
